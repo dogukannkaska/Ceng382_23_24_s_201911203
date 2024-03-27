@@ -1,6 +1,45 @@
 ﻿@page
 @model MyApp.Namespace.nameOfThePageModel
 @{
+    ViewData["Title"] = "Hesap Makinesi";
 }
 
+<style>
+    .hidden {
+        display: none;
+    }
+</style>
 
+<button onclick="hideAll()">Herşeyi Gizle</button>
+<button onclick="showCalculator()">Hesap Makinesi Aç</button>
+
+<div id="content">
+   
+</div>
+
+<div id="calculator" class="hidden">
+    <h2>Hesap Makinesi</h2>
+    <input type="number" id="firstNumber" placeholder="İlk sayıyı girin">
+    <input type="number" id="secondNumber" placeholder="İkinci sayıyı girin">
+    <button onclick="showSum()">Toplamı Hesapla</button>
+    <p id="sumResult"></p>
+</div>
+
+<script>
+    function hideAll() {
+        document.getElementById("content").style.display = "none";
+        document.getElementById("calculator").style.display = "none";
+    }
+
+    function showCalculator() {
+        document.getElementById("content").style.display = "none";
+        document.getElementById("calculator").style.display = "block";
+    }
+
+    function showSum() {
+        let firstNum = parseFloat(document.getElementById('firstNumber').value) || 0;
+        let secondNum = parseFloat(document.getElementById('secondNumber').value) || 0;
+        let sum = firstNum + secondNum;
+        document.getElementById('sumResult').textContent = 'Toplam: ' + sum;
+    }
+</script>
