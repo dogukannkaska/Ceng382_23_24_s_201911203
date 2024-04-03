@@ -1,0 +1,15 @@
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/bin/Debug/net8.0/Ceng382_23_24_s_201911203
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/bin/Debug/net8.0/Ceng382_23_24_s_201911203.deps.json
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/bin/Debug/net8.0/Ceng382_23_24_s_201911203.runtimeconfig.json
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/bin/Debug/net8.0/Ceng382_23_24_s_201911203.dll
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/bin/Debug/net8.0/Ceng382_23_24_s_201911203.pdb
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/Ceng382_23_24_s_201911203.GeneratedMSBuildEditorConfig.editorconfig
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/Ceng382_23_24_s_201911203.AssemblyInfoInputs.cache
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/Ceng382_23_24_s_201911203.AssemblyInfo.cs
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/Ceng382_23_24_s_201911203.csproj.CoreCompileInputs.cache
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/Ceng382_23_24_s_201911203.sourcelink.json
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/Ceng382_23_24_s_201911203.dll
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/refint/Ceng382_23_24_s_201911203.dll
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/Ceng382_23_24_s_201911203.pdb
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/Ceng382_23_24_s_201911203.genruntimeconfig.cache
+/Users/dogukankaska/Desktop/Ceng382_23_24_s_201911203/obj/Debug/net8.0/ref/Ceng382_23_24_s_201911203.dll
