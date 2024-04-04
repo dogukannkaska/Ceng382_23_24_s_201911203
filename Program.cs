@@ -103,7 +103,7 @@ public void DisplayWeeklySchedule()
     Console.Write("Room / Capacity".PadRight(15));
     foreach (var date in dateData)
     {
-        Console.Write($" | {date:dd/MM/yy}".PadRight(15));
+        Console.Write($" | {date:dd/MM/yyyy}".PadRight(15));
     }
     Console.WriteLine();
 
