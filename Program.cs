@@ -1,23 +1,17 @@
 ﻿using System;
+using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Globalization;
 
 public class RoomData
 {
-    [JsonPropertyName("Room")]
-    public Room[] Rooms { get; set; }
+    public Room[] Room { get; set; }
 }
 
 public class Room
 {
-    [JsonPropertyName("roomId")]
     public string roomId { get; set; }
-
-    [JsonPropertyName("roomName")]
     public string roomName { get; set; }
-
-    [JsonPropertyName("capacity")]
     public int capacity { get; set; }
 }
 
@@ -32,15 +26,15 @@ public class Reservation
 public class ReservationHandler
 {
     private Reservation[][] reservations;
-    private RoomData roomData;
+    public RoomData roomData { get; set; }
     private DateTime[] dateData;
 
     public ReservationHandler(RoomData rooms, DateTime[] dates)
     {
         roomData = rooms;
         dateData = dates;
-        reservations = new Reservation[roomData.Rooms.Length][];
-        for (int i = 0; i < roomData.Rooms.Length; i++)
+        reservations = new Reservation[roomData.Room.Length][];
+        for (int i = 0; i < roomData.Room.Length; i++)
         {
             reservations[i] = new Reservation[dates.Length];
         }
@@ -48,12 +42,24 @@ public class ReservationHandler
 
     public bool AddReservation(Reservation reservation)
     {
-        int roomIndex = Array.FindIndex(roomData.Rooms, room => room.roomName == reservation.room.roomName);
+        int roomIndex = Array.FindIndex(roomData.Room, room => room.roomName == reservation.room.roomName);
+        if (roomIndex == -1) 
+        {
+            Console.WriteLine("Room not found.");
+            return false;
+        }
+
         int dateIndex = Array.FindIndex(dateData, date => date.Date == reservation.date.Date);
+        if (dateIndex == -1)
+        {
+            Console.WriteLine("Date not found.");
+            return false;
+        }
 
         if (reservations[roomIndex][dateIndex] == null)
         {
             reservations[roomIndex][dateIndex] = reservation;
+            Console.WriteLine("Reservation added successfully.");
             return true;
         }
         else
@@ -63,22 +69,26 @@ public class ReservationHandler
         }
     }
 
-    // Rezervasyon silme metodu
     public bool RemoveReservation(string roomName, DateTime date, string reserverName)
     {
-        int roomIndex = Array.FindIndex(roomData.Rooms, room => room.roomName == roomName);
-        int dateIndex = Array.FindIndex(dateData, d => d.Date == date.Date);
-
-        if (roomIndex == -1 || dateIndex == -1)
+        int roomIndex = Array.FindIndex(roomData.Room, room => room.roomName == roomName);
+        if (roomIndex == -1) 
         {
-            Console.WriteLine("Room or date not found.");
+            Console.WriteLine("Room not found.");
+            return false;
+        }
+
+        int dateIndex = Array.FindIndex(dateData, d => d.Date == date.Date);
+        if (dateIndex == -1)
+        {
+            Console.WriteLine("Date not found.");
             return false;
         }
 
         var reservation = reservations[roomIndex][dateIndex];
-        if (reservation != null && reservation.reserverName == reserverName && reservation.date.Date == date.Date)
+        if (reservation != null && reservation.reserverName == reserverName)
         {
-            reservations[roomIndex][dateIndex] = null; // Rezervasyonu sil
+            reservations[roomIndex][dateIndex] = null;
             Console.WriteLine("Reservation removed successfully.");
             return true;
         }
@@ -89,171 +99,109 @@ public class ReservationHandler
         }
     }
 
-    
-
-
- public void displayWeeklySchedule()
-{
-    Console.WriteLine("Weekly Schedule");
-    Console.Write("Room".PadRight(15) + " | " + "Capacity".PadRight(8) + " | ");
-    for (int i = 0; i < dateData.Length; i++)
+    public void DisplayWeeklySchedule()
     {
-        Console.Write($"{dateData[i].ToString("dd.MM.yyyy").PadRight(10)} | ");
-    }
-    Console.WriteLine();
-    Console.WriteLine("-".PadRight(dateData.Length * 13 + 24, '-'));
-    
-    for (int j = 0; j < roomData.Rooms.Length; j++)
-    {
-        Console.Write($"{roomData.Rooms[j].roomName.PadRight(15)} | {roomData.Rooms[j].capacity.ToString().PadRight(8)} | ");
-        for (int k = 0; k < reservations[j].Length; k++)
+        Console.WriteLine("Weekly Schedule");
+        foreach (var room in roomData.Room)
         {
-            string displayText = "Free".PadRight(10);
-            if (reservations[j][k] != null)
+            Console.WriteLine($"Room {room.roomName}, Capacity: {room.capacity}");
+            foreach (var date in dateData)
             {
-                displayText = reservations[j][k].reserverName.PadRight(10);
-            }
-            Console.Write($"{displayText} | ");
-        }
-        Console.WriteLine();
-    }
-}
+                int roomIndex = Array.FindIndex(roomData.Room, r => r.roomName == room.roomName);
+                int dateIndex = Array.FindIndex(dateData, d => d.Date == date.Date);
+                var reservation = reservations[roomIndex][dateIndex];
 
+                string status = reservation == null ? "Available" : $"Booked by {reservation.reserverName}";
+                Console.WriteLine($"Date: {date:dd/MM/yyyy}, Status: {status}");
+            }
+            Console.WriteLine(new string('-', 20));
+        }
+    }
 }
 
 class Program
 {
     static void Main(string[] args)
-    {
-        
-        DateTime[] dateData = new DateTime[]
+
+    { 
+
+        var reservation1 = new Reservation
         {
-            DateTime.Now.Date.AddDays(1),
-            DateTime.Now.Date.AddDays(2),
-            DateTime.Now.Date.AddDays(3),
-            DateTime.Now.Date.AddDays(4),
-            DateTime.Now.Date.AddDays(5),
-            DateTime.Now.Date.AddDays(6),
-        };
-
-        RoomData roomData = new RoomData
-        {
-            Rooms = new Room[]
-            {
-                new Room { roomId = "001", roomName = "A-101", capacity = 30 },
-                new Room { roomId = "002", roomName = "A-102", capacity = 24 },
-                new Room { roomId = "003", roomName = "A-103", capacity = 26 },
-                new Room { roomId = "004", roomName = "A-104", capacity = 28 },
-                new Room { roomId = "005", roomName = "A-105", capacity = 30 },
-                new Room { roomId = "006", roomName = "A-106", capacity = 32 },
-                new Room { roomId = "007", roomName = "A-107", capacity = 34 },
-                new Room { roomId = "008", roomName = "A-108", capacity = 36 },
-                new Room { roomId = "009", roomName = "A-109", capacity = 38 },
-                new Room { roomId = "010", roomName = "A-110", capacity = 40 },
-                new Room { roomId = "011", roomName = "A-111", capacity = 42 },
-                new Room { roomId = "012", roomName = "A-112", capacity = 44 },
-                new Room { roomId = "013", roomName = "A-113", capacity = 46 },
-                new Room { roomId = "014", roomName = "A-114", capacity = 48 },
-                new Room { roomId = "015", roomName = "A-115", capacity = 50 },
-                new Room { roomId = "016", roomName = "A-116", capacity = 52 },
-
-                // Continue adding rooms as required
-            }
-        };
-
-        ReservationHandler reservationHandler = new ReservationHandler(roomData, dateData);
-
-        // Predefined reservations can be added here as shown:
-       Reservation reservation1 = new Reservation
-        {
+            room = new Room { roomName = "A-101" }, // Room sınıfınızın yapısı ve kullanımı önemli
+            date = DateTime.Today.AddDays(1),
             time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 0, 0),
-            date = DateTime.Now.Date.AddDays(4),
-            reserverName = "Okan",
-            room = roomData.Rooms[0] 
+            reserverName = "Ali"
         };
-
-        Reservation reservation2 = new Reservation
+        
+        var reservation2 = new Reservation
         {
-            time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 0, 0),
-            date = DateTime.Now.Date.AddDays(3),
-            reserverName = "Doğukan",
-            room = roomData.Rooms[3] 
+            room = new Room { roomName = "A-102" },
+            date = DateTime.Today.AddDays(2),
+            time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 0, 0),
+            reserverName = "Veli"
         };
-
-        Reservation reservation3 = new Reservation
+        
+        var reservation3 = new Reservation
         {
-            time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 0, 0),
-            date = DateTime.Now.Date.AddDays(2),
-            reserverName = "Aleyna",
-            room = roomData.Rooms[0] 
+            room = new Room { roomName = "A-103" },
+            date = DateTime.Today.AddDays(3),
+            time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 0, 0),
+            reserverName = "Ayşe"
         };
+        
+        string fileName = "./Data.json";
+        string jsonString = File.ReadAllText(fileName);
+        RoomData roomData = JsonSerializer.Deserialize<RoomData>(jsonString);
 
-        Reservation reservation4 = new Reservation
+        DateTime[] dates = new DateTime[7];
+        for (int i = 0; i < 7; i++)
         {
-            time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 0, 0),
-            date = DateTime.Now.Date.AddDays(5),
-            reserverName = "Barış",
-            room = roomData.Rooms[7] 
-        };
+            dates[i] = DateTime.Today.AddDays(i);
+        }
 
-        Reservation reservation5 = new Reservation
-        {
-            time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 0, 0),
-            date = DateTime.Now.Date.AddDays(1),
-            reserverName = "Ethem",
-            room = roomData.Rooms[9] 
-        };
+        ReservationHandler reservationHandler = new ReservationHandler(roomData, dates);
 
-
-        
-        
-        
-        reservationHandler.AddReservation(reservation1);
-        reservationHandler.AddReservation(reservation2);
-        reservationHandler.AddReservation(reservation3);
-        reservationHandler.AddReservation(reservation4);
-        reservationHandler.AddReservation(reservation5);
-
-
-
-
-
+        // Add a new reservation
         
 
-        
+        // Attempt to remove a reservation
+        reservationHandler.RemoveReservation("A-101", DateTime.Today.AddDays(1), "John Doe");
+
+        // Display weekly schedule
+                
+                
+                reservationHandler.AddReservation(reservation1);
+                reservationHandler.AddReservation(reservation2);
+                reservationHandler.AddReservation(reservation3);
 
 
-        // Display the weekly schedule to see all reservations
-reservationHandler.displayWeeklySchedule();
+        reservationHandler.DisplayWeeklySchedule();
 
-Console.WriteLine("Enter Your Infos for Delete Reservation");
-        Console.Write("Room Name: ");
+         Console.WriteLine("Rezervasyon silme işlemi için bilgileri giriniz:");
+        Console.Write("Oda İsmi: ");
         string roomName = Console.ReadLine();
-
-        Console.Write("Reservation Date (DD.MM.YYYY): ");
+        Console.Write("Tarih (gg.aa.yyyy): ");
         DateTime date;
         while (!DateTime.TryParseExact(Console.ReadLine(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
         {
-            Console.WriteLine("Invalid Date.");
+            Console.WriteLine("Geçersiz tarih formatı, lütfen gg.aa.yyyy formatında bir tarih giriniz:");
         }
-
-        Console.Write("Guest Name: ");
+        Console.Write("Rezervasyon Yapan Kişinin Adı: ");
         string reserverName = Console.ReadLine();
 
-        // Rezervasyonu silme denemesi
-        bool result = reservationHandler.RemoveReservation(roomName, date, reserverName);
-        if (result)
+        // Rezervasyonu sil
+        bool isRemoved = reservationHandler.RemoveReservation(roomName, date, reserverName);
+        if (isRemoved)
         {
-            Console.WriteLine("Your Reservation is Succesfully Removed.");
+            Console.WriteLine("Rezervasyon başarıyla silindi.");
         }
         else
         {
-            Console.WriteLine("Invalid Infos.");
+            Console.WriteLine("Rezervasyon bulunamadı veya silinemedi.");
         }
-reservationHandler.displayWeeklySchedule();
+        reservationHandler.DisplayWeeklySchedule();
 
     }
-
 
     
 }
