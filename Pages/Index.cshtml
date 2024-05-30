@@ -1,0 +1,236 @@
+﻿@page
+@model HotelReservationSystem.Pages.IndexModel
+@{
+    var userEmail = HttpContext.Session.GetString("UserEmail");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Hotel Reservation System</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Hotel Reservation System</h1>
+
+        @if (userEmail == null)
+        {
+            <div>
+                <a class="btn btn-primary" asp-page="/Register">Register</a>
+                <a class="btn btn-primary" asp-page="/Login">Login</a>
+            </div>
+        }
+        else
+        {
+            <h2>Welcome, @userEmail</h2>
+            <p>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRoomModal">Create New Room</button>
+                <form method="post" asp-page-handler="Logout" class="d-inline">
+                    <button type="submit" class="btn btn-secondary">Logout</button>
+                </form>
+            </p>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="sidebar">
+                        <h2>Filters</h2>
+                        <form method="get">
+                            <div class="form-group">
+                                <label for="filterRoomName">Filter by Room Name</label>
+                                <input type="text" id="filterRoomName" name="FilterRoomName" class="form-control" value="@Model.FilterRoomName" />
+                            </div>
+                            <div class="form-group">
+                                <label for="filterStartDate">Filter by Start Date</label>
+                                <input type="date" id="filterStartDate" name="FilterStartDate" class="form-control" value="@Model.FilterStartDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="form-group">
+                                <label for="filterEndDate">Filter by End Date</label>
+                                <input type="date" id="filterEndDate" name="FilterEndDate" class="form-control" value="@Model.FilterEndDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="form-group">
+                                <label for="filterCapacity">Filter by Capacity</label>
+                                <input type="number" id="filterCapacity" name="FilterCapacity" class="form-control" value="@Model.FilterCapacity" />
+                            </div>
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <h2>Available Rooms</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Capacity</th>
+                                <th>View</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Rooms != null)
+                            {
+                                foreach (var room in Model.Rooms)
+                                {
+                                    <tr>
+                                        <td>@room.Name</td>
+                                        <td>@room.Capacity</td>
+                                        <td>@room.View</td>
+                                        <td>
+                                            @if (room.Reservations != null && room.Reservations.Any())
+                                            {
+                                                <span class="badge badge-warning">Reserved</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-success">Available</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-primary" asp-page="/CreateReservation" asp-route-roomId="@room.Id">Reserve</a>
+                                            <form method="post" asp-page-handler="DeleteRoom" asp-route-roomId="@room.Id" class="d-inline">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                    <h2>Reserved Rooms</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Room Name</th>
+                                <th>User Name</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var reservation in Model.ReservedRooms)
+                            {
+                                <tr>
+                                    <td>@reservation.Room.Name</td>
+                                    <td>@reservation.UserName</td>
+                                    <td>@reservation.StartDate.ToShortDateString()</td>
+                                    <td>@reservation.EndDate.ToShortDateString()</td>
+                                    <td>
+                                        @if (reservation.UserName == userEmail)
+                                        {
+                                            <button class="btn btn-warning" onclick="openEditModal(@reservation.Id, '@reservation.StartDate.ToString("yyyy-MM-dd")', '@reservation.EndDate.ToString("yyyy-MM-dd")')">Edit</button>
+                                            <form method="post" asp-page-handler="DeleteReservation" asp-route-id="@reservation.Id" class="d-inline">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Create Room Modal -->
+    <div class="modal fade" id="createRoomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createRoomModalLabel">Create New Room</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createRoomForm" method="post" asp-page="Index" asp-page-handler="CreateRoom">
+                        <div class="form-group">
+                            <label asp-for="Room.Name" class="control-label"></label>
+                            <input asp-for="Room.Name" class="form-control" />
+                            <span asp-validation-for="Room.Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Room.Capacity" class="control-label"></label>
+                            <input asp-for="Room.Capacity" class="form-control" type="number" />
+                            <span asp-validation-for="Room.Capacity" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Room.View" class="control-label"></label>
+                            <input asp-for="Room.View" class="form-control" />
+                            <span asp-validation-for="Room.View" class="text-danger"></span>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Reservation Modal -->
+    <div class="modal fade" id="editReservationModal" tabindex="-1" role="dialog" aria-labelledby="editReservationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editReservationModalLabel">Edit Reservation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editReservationForm" method="post" asp-page="Index" asp-page-handler="EditReservation">
+                        <input type="hidden" id="editReservationId" asp-for="Reservation.Id" />
+                        <div class="form-group">
+                            <label asp-for="Reservation.StartDate" class="control-label"></label>
+                            <input asp-for="Reservation.StartDate" class="form-control" type="date" id="editStartDate" />
+                            <span asp-validation-for="Reservation.StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Reservation.EndDate" class="control-label"></label>
+                            <input asp-for="Reservation.EndDate" class="form-control" type="date" id="editEndDate" />
+                            <span asp-validation-for="Reservation.EndDate" class="text-danger"></span>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for loading reservation data into modal -->
+    <script>
+        function openEditModal(id, startDate, endDate) {
+            document.getElementById("editReservationId").value = id;
+            document.getElementById("editStartDate").value = startDate;
+            document.getElementById("editEndDate").value = endDate;
+            $('#editReservationModal').modal('show');
+        }
+
+        function deleteReservation(id) {
+            if (confirm("Are you sure you want to delete this reservation?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "?handler=DeleteReservation",
+                    data: { id: id },
+                    success: function (response) {
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        alert("An error occurred while deleting the reservation: " + error);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
